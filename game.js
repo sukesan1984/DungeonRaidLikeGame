@@ -7,7 +7,7 @@
 
 	function initialize(){
 		enchant();
-		var game = new Game( 640, 960 );
+		var game = new Game( 400, 400 );
 		var resources = [
 			"img/panels2.png",
 			"img/yajirushi.png"
