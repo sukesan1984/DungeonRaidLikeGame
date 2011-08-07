@@ -243,7 +243,8 @@
 			onTouchStart: function(e) {
 				var pos = this.getTouchPosition( e.localX, e.localY );
 				//このタイミングで、なにがタップされたか記録
-				this.typeOfPanel = this.fields[pos.x][pos.y].getPanelType();
+				this.typeOfPanel = this.fields[pos.x][pos.y].getChainedType();
+				console.log( this.typeOfPanel );
 				this.setLastTargetPos(pos);
 				this.chainedPanels.push ( this.fields[pos.x][pos.y] );
 				this.removedPositions.push ( pos );
@@ -407,7 +408,6 @@
 						var p = this.fields[x][y];
 						p.moveTo( x * PANEL_X_SIZE * this.scale, y * PANEL_Y_SIZE * this.scale );
 						p.scale( this.scale, this.scale );
-						console.log( " reflesh pos x:" + x + "y:" + y );
 						p.setPos( { x:x, y:y } );
 					}
 				}
@@ -440,7 +440,8 @@
 			//initialize: function( x, y, pos ) {
 			initialize: function( x, y ) {
 				Sprite.apply( this, arguments );
-				this.panelType = undefined;
+				this.panelType   = undefined;
+				this.chainedType = undefined; 
 				this.isTouching = true;
 				//this.pos = pos;
 				this.chained = false;
@@ -454,6 +455,9 @@
 				this.addEventListener('touchstart', bind( function(e){
 					this.onTouch();
 				}, this ));
+			},
+			setChainedType: function() {
+				this.chainedType = this.panelType;
 			},
 			setPos: function(pos) {
 				if( pos.x === undefined || pos.y === undefined ){ return; }
@@ -477,9 +481,13 @@
 			getPanelType: function() {
 				return this.panelType;
 			},
+			
+			getChainedType: function() {
+				return this.chainedType;
+			},
 
 			isSamePanel: function( panelType) {
-				return panelType === this.panelType;
+				return panelType === this.chainedType;
 			},
 
 			removePanel: function() {
@@ -508,6 +516,7 @@
 				this.image = game.assets[ 'img/panels3.png'];
 				this.panelType = PANEL_TYPE.COIN;
 				this.frame     = 1;
+				this.setChainedType();
 			},
 		});
 
@@ -518,6 +527,7 @@
 				this.panelType = PANEL_TYPE.POTION;
 				this.frame     = 2;
 				this.restore   = 1;
+				this.setChainedType();
 			},
 			getRestore: function() {
 				return this.restore;
@@ -533,6 +543,7 @@
 				this.image = game.assets[ 'img/panels3.png'];
 				this.panelType = PANEL_TYPE.SHIELD;
 				this.frame  = 3;
+				this.setChainedType();
 			},
 		});
 
@@ -543,10 +554,14 @@
 				this.panelType = PANEL_TYPE.SKELTON;
 				this.frame  = 4;
 				this.damage = 1;
+				this.setChainedType();
 			},
 			getDamage: function() {
 				return this.damage;
-			}
+			},
+			setChainedType: function() {
+				this.chainedType = PANEL_TYPE.SWORD;
+			},
 		});
 
 		var Sword    = Class.create( Panel, {
@@ -555,6 +570,7 @@
 				this.image = game.assets[ 'img/panels3.png'];
 				this.panelType = PANEL_TYPE.SWORD;
 				this.frame  = 5;
+				this.setChainedType();
 			},
 		});
 
