@@ -9,7 +9,7 @@
 		enchant();
 		var game = new Game( 400, 400 );
 		var resources = [
-			"img/panels2.png",
+			"img/panels3.png",
 			"img/yajirushi.png"
 		];
 		var PANEL_X_SIZE = 64;
@@ -167,7 +167,7 @@
 				for (var x = 0; x < this.panelX; x++) {
 					this.fields[x] = [];
 					for (var y = 0; y < this.panelY; y++) {
-						var type = parseInt( Math.random() * 4 ) + 1;
+						var type = parseInt( Math.random() * 5 ) + 1;
 						this.fields[x][y] = this.createPanel( type );
 						this.fields[x][y].setPos( { x:x, y:y } );
 					}
@@ -193,6 +193,10 @@
 						//return new Sword(PANEL_X_SIZE, PANEL_Y_SIZE, pos);
 						return new Sword( PANEL_X_SIZE, PANEL_Y_SIZE );
 						break;
+					case 5:
+						//return new Sword(PANEL_X_SIZE, PANEL_Y_SIZE, pos);
+						return new Potion( PANEL_X_SIZE, PANEL_Y_SIZE );
+						break;
 					default :
 						//return new Sword(PANEL_X_SIZE, PANEL_Y_SIZE, pos);
 						return new Sword( PANEL_X_SIZE, PANEL_Y_SIZE );
@@ -207,7 +211,7 @@
 						if ( p === null ) {
 							console.log( "hoge" );
 							this.fields[x].splice( y, 1 );
-							var type = parseInt( Math.random() * 4 ) + 1;
+							var type = parseInt( Math.random() * 5 ) + 1;
 							//p = this.createPanel( type, { x:x, y:0 } );
 							p = this.createPanel( type );
 							this.fields[x].unshift( p );
@@ -298,7 +302,7 @@
 			},
 			removePanel: function() {
 				this.frame  = 0;
-				this.image  = game.assets[ 'img/panels2.png' ];
+				this.image  = game.assets[ 'img/panels3.png' ];
 				this.removd = true;
 			},
 
@@ -315,36 +319,45 @@
 		var Coin    = Class.create( Panel, {
 			initialize: function() {
 				Panel.apply( this, arguments );
-				this.image = game.assets[ 'img/panels2.png'];
+				this.image = game.assets[ 'img/panels3.png'];
 				this.panelType = 2;
 				this.frame     = 1;
+			},
+		});
+
+		var Potion    = Class.create( Panel, {
+			initialize: function() {
+				Panel.apply( this, arguments );
+				this.image = game.assets[ 'img/panels3.png'];
+				this.panelType = 3;
+				this.frame     = 2;
 			},
 		});
 
 		var Shield    = Class.create( Panel, {
 			initialize: function() {
 				Panel.apply( this, arguments );
-				this.image = game.assets[ 'img/panels2.png'];
-				this.panelType = 3;
-				this.frame  = 2;
+				this.image = game.assets[ 'img/panels3.png'];
+				this.panelType = 4;
+				this.frame  = 3;
 			},
 		});
 
 		var Skelton    = Class.create( Panel, {
 			initialize: function() {
 				Panel.apply( this, arguments );
-				this.image = game.assets[ 'img/panels2.png'];
-				this.panelType = 4;
-				this.frame  = 3;
+				this.image = game.assets[ 'img/panels3.png'];
+				this.panelType = 5;
+				this.frame  = 4;
 			},
 		});
 
 		var Sword    = Class.create( Panel, {
 			initialize: function() {
 				Panel.apply( this, arguments );
-				this.image = game.assets[ 'img/panels2.png'];
-				this.panelType = 5;
-				this.frame  = 4;
+				this.image = game.assets[ 'img/panels3.png'];
+				this.panelType = 6;
+				this.frame  = 5;
 			},
 		});
 
