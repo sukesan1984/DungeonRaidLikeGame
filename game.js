@@ -154,7 +154,10 @@
 			},
 
 			endTurn: function() {
-				var damage = this.Field.getDamageFromEnemies();
+				this.Field.closeUp();
+				var damage      = this.Field.getDamageFromEnemies();
+				var restoreLife = this.Field.getRemovedPanelsInfo();
+				this.Player.restoreLife( restoreLife );
 				this.Player.reduceLife( damage );
 				if ( this.Player.getLife() <= 0) {
 					this.onGameOver();
@@ -173,7 +176,6 @@
 				this.turn++;
 				//ターンが終了したときに呼ばれる。
 				//終了処理
-				this.Field.closeUp();
 				this.Field.clear();
 				this.startTurn();
 			}
@@ -190,6 +192,11 @@
 			reduceLife: function( dLife ) {
 				if ( dLife === undefined ) { return; }
 				this.life -= dLife;
+			},
+
+			restoreLife: function( dLife ) {
+				if ( dLife === undefined ) { return; }
+				this.life += dLife;
 			}
 		});
 
@@ -406,6 +413,15 @@
 					}
 				}
 				return damage;
+			},
+			getRemovedPanelsInfo: function() {
+				//まずはライフだけ
+				var restoreLife = 0;
+				var length = this.chainedPanels.length;
+				for ( var i = 0; i < length; i++ ){
+					restoreLife += this.chainedPanels[i].getInfoWhenRemoved();
+				}
+				return restoreLife ;
 			}
 		});
 
@@ -454,10 +470,15 @@
 			isSamePanel: function( panelType) {
 				return panelType === this.panelType;
 			},
+
 			removePanel: function() {
 				this.frame  = 0;
 				this.image  = game.assets[ 'img/panels3.png' ];
 				this.removd = true;
+			},
+
+			getInfoWhenRemoved: function() {
+				return 0;
 			},
 
 			isNextPanel: function( pos ){
@@ -488,7 +509,10 @@
 				this.restore   = 1;
 			},
 			getRestore: function() {
-				return this.restore();
+				return this.restore;
+			},
+			getInfoWhenRemoved: function() {
+				return this.getRestore();
 			}
 		});
 
