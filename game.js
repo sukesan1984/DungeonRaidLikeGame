@@ -14,6 +14,7 @@
 		];
 		var PANEL_X_SIZE = 64;
 		var PANEL_Y_SIZE = 64;
+		var DEBUG_MODE   = true;
 		game.preload( resources );
 
 		var TitleScene = Class.create( Scene, {
@@ -59,6 +60,7 @@
 		var Field    = Class.create( Group, {
 			initialize: function( scale ) {
 				Group.apply( this, arguments );
+				this.REMOVE_CHAINED_NUM = 3;
 				this.panelX      = 6;
 				this.panelY      = 6;
 				//パネルクラスのインスタンスを格納する。
@@ -68,10 +70,12 @@
 				this.typeOfPanel = undefined;
 				this.lastTargetPos     = { x: undefined, y:undefined };
 				//つながっている数。
-				this.chainedNum        = 0;
+				this.chainedNum        = 1;
 				this.chainedPanels     = [];
+				this.removedPositions  = [];
 				this.drawnArrows       = [];
 				this.createInitialField();
+				this.refleshPos();
 				this.onEnter();
 			},
 
@@ -93,6 +97,7 @@
 				this.typeOfPanel = this.fields[pos.x][pos.y].getPanelType();
 				this.setLastTargetPos(pos);
 				this.chainedPanels.push ( this.fields[pos.x][pos.y] );
+				this.removedPositions.push ( pos );
 			},
 
 			onTouchMove: function(e) {
@@ -111,13 +116,22 @@
 						this.chainedNum++
 						this.setLastTargetPos( pos );
 						this.chainedPanels.push ( panel );
+						this.removedPositions.push ( pos );
 					}
 				}
 			},
 
 			onTouchEnd: function(e) {
+				if ( this.chainedNum >= this.REMOVE_CHAINED_NUM ) {
+					for ( var i = 0; i < this.chainedPanels.length; i++ ){
+						this.chainedPanels[i].removePanel();
+					}
+					this.closeUp();
+				}
+				for ( var i = 0; i < this.drawnArrows.length; i++ ){
+					this.removeChild(this.drawnArrows[i]);
+				}
 				this.clear();
-				console.log( this.chainedNum );
 			},
 
 			getTouchPosition: function( x, y ) {
@@ -142,13 +156,11 @@
 
 			clear: function() {
 				this.typeOfPanel = undefined;
-				this.setLastTargetPos( { x:undefined, y:undefined } );
-				for ( var i = 0; i < this.chainedPanels.length; i++ ){
-					this.chainedPanels[i].removePanel();
-				}
-				for ( var i = 0; i < this.drawnArrows.length; i++ ){
-					this.removeChild(this.drawnArrows[i]);
-				}
+				this.lastTargetPos = { x:undefined, y:undefined };
+				this.chainedNum = 1;
+				this.chainedPanels     = [];
+				this.drawnArrows       = [];
+				this.removedPositions  = [];
 			},
 
 			createInitialField: function(){
@@ -156,27 +168,34 @@
 					this.fields[x] = [];
 					for (var y = 0; y < this.panelY; y++) {
 						var type = parseInt( Math.random() * 4 ) + 1;
-						this.fields[x][y] = this.createPanel( type, { x:x, y:y } );
+						this.fields[x][y] = this.createPanel( type );
+						this.fields[x][y].setPos( { x:x, y:y } );
 					}
 				}
 			},
 
-			createPanel: function( panelType, pos ){
+			//createPanel: function( panelType, pos ){
+			createPanel: function( panelType ){
 				switch( panelType ) {
 					case 1:
-						return new Coin(PANEL_X_SIZE, PANEL_Y_SIZE, pos);
+						//return new Coin(PANEL_X_SIZE, PANEL_Y_SIZE, pos);
+						return new Coin( PANEL_X_SIZE, PANEL_Y_SIZE );
 						break;
 					case 2:
-						return new Shield(PANEL_X_SIZE, PANEL_Y_SIZE, pos);
+						//return new Shield(PANEL_X_SIZE, PANEL_Y_SIZE, pos);
+						return new Shield( PANEL_X_SIZE, PANEL_Y_SIZE );
 						break;
 					case 3:
-						return new Skelton(PANEL_X_SIZE, PANEL_Y_SIZE, pos);
+						//return new Skelton(PANEL_X_SIZE, PANEL_Y_SIZE, pos);
+						return new Skelton( PANEL_X_SIZE, PANEL_Y_SIZE );
 						break;
 					case 4:
-						return new Sword(PANEL_X_SIZE, PANEL_Y_SIZE, pos);
+						//return new Sword(PANEL_X_SIZE, PANEL_Y_SIZE, pos);
+						return new Sword( PANEL_X_SIZE, PANEL_Y_SIZE );
 						break;
 					default :
-						return new Sword(PANEL_X_SIZE, PANEL_Y_SIZE, pos);
+						//return new Sword(PANEL_X_SIZE, PANEL_Y_SIZE, pos);
+						return new Sword( PANEL_X_SIZE, PANEL_Y_SIZE );
 						break;
 				}
 			},
@@ -185,9 +204,14 @@
 				for (var x = 0; x < this.panelX; x++) {
 					for (var y = 0; y < this.panelY; y++) {
 						var p = this.fields[x][y];
-						p.moveTo( x * PANEL_X_SIZE * this.scale, y * PANEL_Y_SIZE * this.scale );
-						p.scale( this.scale, this.scale );
-						//p.moveTo( x * PANEL_X_SIZE, y * PANEL_Y_SIZE );
+						if ( p === null ) {
+							console.log( "hoge" );
+							this.fields[x].splice( y, 1 );
+							var type = parseInt( Math.random() * 4 ) + 1;
+							//p = this.createPanel( type, { x:x, y:0 } );
+							p = this.createPanel( type );
+							this.fields[x].unshift( p );
+						}
 						this.addChild(p);
 					}
 				}
@@ -199,16 +223,43 @@
 				arrow.scale( this.scale, this.scale );
 				this.drawnArrows.push( arrow );
 				this.addChild( arrow );
+			},
+
+			closeUp: function() {
+				for ( var i = 0; i < this.removedPositions.length; i++ ){
+					var removedPos    = this.removedPositions[i];
+					var removedPanel  = this.fields[removedPos.x][removedPos.y];
+					console.log( " removed Pos ");
+					console.log( " remove pos x:" + removedPos.x + "y:" + removedPos.y );
+					this.removeChild( removedPanel );
+					this.fields[removedPos.x][removedPos.y] = null;
+				}
+				this.drawField();
+				this.refleshPos();
+			},
+
+			refleshPos: function() {
+				for (var x = 0; x < this.panelX; x++) {
+					for (var y = 0; y < this.panelY; y++) {
+						var p = this.fields[x][y];
+						p.moveTo( x * PANEL_X_SIZE * this.scale, y * PANEL_Y_SIZE * this.scale );
+						p.scale( this.scale, this.scale );
+						console.log( " reflesh pos x:" + x + "y:" + y );
+						p.setPos( { x:x, y:y } );
+					}
+				}
 			}
 		});
 
 		var Panel    = Class.create( Sprite, {
-			initialize: function( x, y, pos ) {
+			//initialize: function( x, y, pos ) {
+			initialize: function( x, y ) {
 				Sprite.apply( this, arguments );
 				this.panelType = undefined;
 				this.isTouching = true;
-				this.pos = pos;
+				//this.pos = pos;
 				this.chained = false;
+				this.removed = false;
 				//this.width  = PANEL_X_SIZE;
 				//this.height = PANEL_Y_SIZE;
 				this.onEnter();
@@ -218,6 +269,10 @@
 				this.addEventListener('touchstart', bind( function(e){
 					this.onTouch();
 				}, this ));
+			},
+			setPos: function(pos) {
+				if( pos.x === undefined || pos.y === undefined ){ return; }
+				this.pos = pos;
 			},
 
 			setChained: function() {
@@ -231,6 +286,7 @@
 			},
 
 			onTouch: function() {
+				console.log( "x:" + this.pos.x + "y:" + this.pos.y);
 			},
 
 			getPanelType: function() {
@@ -241,8 +297,9 @@
 				return panelType === this.panelType;
 			},
 			removePanel: function() {
-				this.frame = 0;
-				this.image = game.assets[ 'img/panels2.png' ];
+				this.frame  = 0;
+				this.image  = game.assets[ 'img/panels2.png' ];
+				this.removd = true;
 			},
 
 			isNextPanel: function( pos ){
@@ -262,9 +319,6 @@
 				this.panelType = 2;
 				this.frame     = 1;
 			},
-			onTouch: function() {
-				console.log( "Coin がタッチされたよ" );
-			}
 		});
 
 		var Shield    = Class.create( Panel, {
@@ -274,9 +328,6 @@
 				this.panelType = 3;
 				this.frame  = 2;
 			},
-			onTouch: function() {
-				console.log( "Shield がタッチされたよ" );
-			}
 		});
 
 		var Skelton    = Class.create( Panel, {
@@ -286,9 +337,6 @@
 				this.panelType = 4;
 				this.frame  = 3;
 			},
-			onTouch: function() {
-				console.log( "Skelton がタッチされたよ" );
-			}
 		});
 
 		var Sword    = Class.create( Panel, {
@@ -298,9 +346,6 @@
 				this.panelType = 5;
 				this.frame  = 4;
 			},
-			onTouch: function() {
-				console.log( "Sword がタッチされたよ" );
-			}
 		});
 
 		var Arrow   = Class.create( Sprite, {
