@@ -9,7 +9,7 @@
 		enchant();
 		var game = new Game( 400, 400 );
 		var resources = [
-			"img/panels3.png",
+			"img/panels5.png",
 			"img/yajirushi.png"
 		];
 		var PANEL_X_SIZE = 64;
@@ -263,6 +263,7 @@
 					this.drawArrow( pos,                dirs.newPanel );
 					if( panel.setChained() ){
 						this.chainedNum++
+						panel.onTouch();
 						this.setLastTargetPos( pos );
 						this.chainedPanels.push ( panel );
 						this.removedPositions.push ( pos );
@@ -276,6 +277,9 @@
 				var chainedPanelsLength = this.chainedPanels.length;
 				for ( var i = 0; i < drawnArrowLength; i++ ){
 					this.removeChild(this.drawnArrows[i]);
+				}
+				for ( var i = 0; i < chainedPanelsLength; i++ ){
+					this.chainedPanels[i].onTouchEnd();
 				}
 				if ( this.chainedNum >= this.REMOVE_CHAINED_NUM ) {
 					for ( var i = 0; i < chainedPanelsLength; i++ ){
@@ -477,6 +481,8 @@
 			onTouch: function() {
 				console.log( "x:" + this.pos.x + "y:" + this.pos.y);
 			},
+			onTouchEnd: function(){
+			},
 
 			getPanelType: function() {
 				return this.panelType;
@@ -492,7 +498,7 @@
 
 			removePanel: function() {
 				this.frame  = 0;
-				this.image  = game.assets[ 'img/panels3.png' ];
+				this.image  = game.assets[ 'img/panels5.png' ];
 				this.removd = true;
 			},
 
@@ -513,7 +519,7 @@
 		var Coin    = Class.create( Panel, {
 			initialize: function() {
 				Panel.apply( this, arguments );
-				this.image = game.assets[ 'img/panels3.png'];
+				this.image = game.assets[ 'img/panels5.png'];
 				this.panelType = PANEL_TYPE.COIN;
 				this.frame     = 1;
 				this.setChainedType();
@@ -523,7 +529,7 @@
 		var Potion    = Class.create( Panel, {
 			initialize: function() {
 				Panel.apply( this, arguments );
-				this.image = game.assets[ 'img/panels3.png'];
+				this.image = game.assets[ 'img/panels5.png'];
 				this.panelType = PANEL_TYPE.POTION;
 				this.frame     = 2;
 				this.restore   = 1;
@@ -540,7 +546,7 @@
 		var Shield    = Class.create( Panel, {
 			initialize: function() {
 				Panel.apply( this, arguments );
-				this.image = game.assets[ 'img/panels3.png'];
+				this.image = game.assets[ 'img/panels5.png'];
 				this.panelType = PANEL_TYPE.SHIELD;
 				this.frame  = 3;
 				this.setChainedType();
@@ -550,11 +556,12 @@
 		var Skelton    = Class.create( Panel, {
 			initialize: function() {
 				Panel.apply( this, arguments );
-				this.image = game.assets[ 'img/panels3.png'];
+				this.image = game.assets[ 'img/panels5.png'];
 				this.panelType = PANEL_TYPE.SKELTON;
 				this.frame  = 4;
 				this.damage = 1;
 				this.setChainedType();
+				this.life   = 1;
 			},
 			getDamage: function() {
 				return this.damage;
@@ -562,14 +569,27 @@
 			setChainedType: function() {
 				this.chainedType = PANEL_TYPE.SWORD;
 			},
+			onTouch: function() {
+				if( this.isDead() ) { this.changeImage(); }
+			},
+			onTouchEnd: function() {
+				this.frame = 4;
+			},
+			isDead: function( damage ) {
+				//damageを与えて死ぬかどうかをlifeと比べる
+				return true;
+			},
+			changeImage: function() {
+				this.frame = 5;
+			}
 		});
 
 		var Sword    = Class.create( Panel, {
 			initialize: function() {
 				Panel.apply( this, arguments );
-				this.image = game.assets[ 'img/panels3.png'];
+				this.image = game.assets[ 'img/panels5.png'];
 				this.panelType = PANEL_TYPE.SWORD;
-				this.frame  = 5;
+				this.frame  = 6;
 				this.setChainedType();
 			},
 		});
