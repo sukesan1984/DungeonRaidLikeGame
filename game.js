@@ -217,6 +217,7 @@
 				this.chainedPanels     = [];
 				this.removedPositions  = [];
 				this.drawnArrows       = [];
+				//this.drawnArrowsInfo    = {};
 				this.createInitialField();
 				this.refleshPos();
 				this.onEnter();
@@ -270,11 +271,13 @@
 
 			onTouchEnd: function(e) {
 				//ターン終了か、消えなかったときは、ターン中に戻る。
-				for ( var i = 0; i < this.drawnArrows.length; i++ ){
+				var drawnArrowLength    = this.drawnArrows.length;
+				var chainedPanelsLength = this.chainedPanels.length;
+				for ( var i = 0; i < drawnArrowLength; i++ ){
 					this.removeChild(this.drawnArrows[i]);
 				}
 				if ( this.chainedNum >= this.REMOVE_CHAINED_NUM ) {
-					for ( var i = 0; i < this.chainedPanels.length; i++ ){
+					for ( var i = 0; i < chainedPanelsLength; i++ ){
 						this.chainedPanels[i].removePanel();
 					}
 					this.turnManager.endTurn();
@@ -309,6 +312,7 @@
 				this.chainedNum = 1;
 				this.chainedPanels     = [];
 				this.drawnArrows       = [];
+				//this.drawnArrowsInfo   = {};
 				this.removedPositions  = [];
 			},
 
@@ -370,9 +374,16 @@
 			},
 
 			drawArrow: function( pos, dir ) {
+				var drawnArrowLength    = this.drawnArrows.length;
+				for ( var i = 0; i < drawnArrowLength; i++ ){
+					var a = this.drawnArrows[i];
+					if ( pos === a.pos && dir === a.dir ) { return; }
+				}
+				
 				var arrow =  new Arrow( PANEL_X_SIZE, PANEL_Y_SIZE, dir );
 				arrow.moveTo( pos.x * PANEL_X_SIZE * this.scale, pos.y * PANEL_Y_SIZE * this.scale );
 				arrow.scale( this.scale, this.scale );
+				arrow.setPosAndDir( pos, dir );
 				this.drawnArrows.push( arrow );
 				this.addChild( arrow );
 			},
@@ -552,9 +563,13 @@
 				Sprite.apply( this, arguments );
 				this.image = game.assets[ 'img/yajirushi.png' ];
 				this.frame = dir;
+				this.dir   = dir;
+				this.pos   = {x: undefined, y: undefined };
 			},
-			setDirection: function ( dir ) {
+			setPosAndDir: function ( pos, dir ) {
 				this.frame = dir;
+				this.pos   = pos;
+				this.dir   = dir;
 			},
 		});
 
