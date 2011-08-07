@@ -219,6 +219,7 @@
 			initialize: function() {
 				Group.apply( this, arguments );
 				this.life       = 50;
+				this.maxLife    = 60;
 				this.shield     = 5;
 				this.score      = 0;
 			},
@@ -235,6 +236,7 @@
 			restoreLife: function( dLife ) {
 				if ( dLife === undefined ) { return; }
 				this.life += dLife;
+				if ( this.life > this.maxLife ) { this.life = this.maxLife; }
 			},
 
 			getShield: function() {
