@@ -184,11 +184,15 @@
 			endTurn: function() {
 				this.Field.closeUp();
 				var damage      = this.Field.getDamageFromEnemies();
+				var gotDamage   = ( ( damage - this.Player.getShield() ) < 0 ) ? 0 : damage - this.Player.getShield();
 				var restoreLife = this.Field.getRemovedPanelsInfo();
 				var score       = this.Field.getGotScores();
+				var shields     = this.Field.getGotShields();
 				this.Player.restoreLife( restoreLife );
-				this.Player.reduceLife( damage );
+				this.Player.reduceLife( gotDamage );
+				this.Player.consumeShield( damage );
 				this.Player.addScore( score );
+				this.Player.addShield( shields );
 				if ( this.Player.getLife() <= 0) {
 					this.onGameOver();
 				}
@@ -245,6 +249,7 @@
 			consumeShield: function( dShield ) {
 				if ( dShield === undefined ) { return; }
 				this.shield -= dShield;
+				if ( this.shield < 0 ) { this.shield = 0; }
 			},
 
 			getScore: function() {
@@ -507,6 +512,15 @@
 					score += this.chainedPanels[i].getScore() * ( i + 1 );
 				}
 				return score;
+			},
+
+			getGotShields: function() {
+				var shields = 0;
+				var length = this.chainedPanels.length;
+				for ( var i = 0; i < length; i++ ){
+					shields += this.chainedPanels[i].getInfoWhenRemoved();
+				}
+				return shields;
 			}
 		});
 
@@ -627,7 +641,11 @@
 				this.score      = SCORE.SHIELD;
 				this.frame  = 3;
 				this.setChainedType();
+				this.shield = 1;
 			},
+			getInfoWhenRemoved: function() {
+				return this.shield;
+			}
 		});
 
 		var Skelton    = Class.create( Panel, {
