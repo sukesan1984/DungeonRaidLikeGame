@@ -219,7 +219,7 @@
 			initialize: function() {
 				Group.apply( this, arguments );
 				this.life       = 50;
-				this.maxLife    = 60;
+				this.maxLife    = 100;
 				this.shield     = 5;
 				this.score      = 0;
 			},
