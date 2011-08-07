@@ -40,7 +40,18 @@
 			}
 		});
 
+		var Score     = Class.create({
+			initialize: function() {
+				this.COIN      = 10;
+				this.SKELTON   = 5;
+				this.SWORD     = 1;
+				this.POTION    = 2;
+				this.SHIELD    = 1;
+			}
+		});
+
 		var DIRECTION = new Direction();
+		var SCORE     = new Score();
 		var DEBUG_MODE   = true;
 		game.preload( resources );
 
@@ -67,21 +78,25 @@
 		});
 
 		var GameOverScene = Class.create( Scene, {
-			initialize: function( game, nextScene ) {
+			initialize: function( game, score ) {
 				Scene.apply( this, arguments );
 				this.game       = game;
+				this.score      = score;
 				this.onEnter();
 			},
 			onEnter: function() {
 				this.title      = new Label( "Game Over" );
 				this.gamestart  = new Label( "Retry" );
+				this.scoreLabel = new Label( "今回のスコア:" + score );
 				this.gamestart.moveTo( 0, 20 );
+				this.scoreLabel.moveTo( 0, 40 );
 				this.gamestart.addEventListener('touchstart', bind( function(e) {
 					this.nextScene  = new GameScene( game );
 					this.game.replaceScene( this.nextScene );
 					this.onExit();
 				}, this ));
 				this.addChild(this.title);
+				this.addChild(this.scoreLabel)
 				this.addChild(this.gamestart);
 			},
 			onExit: function(){
@@ -105,10 +120,20 @@
 				this.Field.moveTo( 0, 20 );
 				this.Field.addTurnManager( this.turnManager );
 				this.Player     = new Player();
+
 				this.lifeLabel  = new Label();
-				this.lifeLabel.moveTo( 200, 0 );
+				this.lifeLabel.moveTo( 150, 0 );
+
+				this.shieldLabel = new Label();
+				this.shieldLabel.moveTo( 200, 0 );
+
+				this.scoreLabel  = new Label();
+				this.scoreLabel.moveTo( 250, 0 );
+
 				this.addChild( this.turnLabel );
 				this.addChild( this.lifeLabel );
+				this.addChild( this.shieldLabel );
+				this.addChild( this.scoreLabel );
 				this.addChild( this.Field );
 				this.addChild( this.Player );
 				this.turnManager.addField( this.Field );
@@ -117,14 +142,17 @@
 			},
 
 			onUpdate: function() {
-				this.turnLabel.text = "turn:" + this.turnManager.getTurn();
-				this.lifeLabel.text = "life:" + this.Player.getLife();
+				this.turnLabel.text   = "turn: " + this.turnManager.getTurn();
+				this.lifeLabel.text   = "life: " + this.Player.getLife();
+				this.shieldLabel.text = "shield: " + this.Player.getShield();
+				this.scoreLabel.text  = "score: "  + this.Player.getScore();
 			},
 
 			onGameOver: function() {
 				this.nextScene  = new GameOverScene( game );
 				this.game.replaceScene( this.nextScene );
 			},
+
 
 			onExit: function() {
 			}
@@ -157,8 +185,10 @@
 				this.Field.closeUp();
 				var damage      = this.Field.getDamageFromEnemies();
 				var restoreLife = this.Field.getRemovedPanelsInfo();
+				var score       = this.Field.getGotScores();
 				this.Player.restoreLife( restoreLife );
 				this.Player.reduceLife( damage );
+				this.Player.addScore( score );
 				if ( this.Player.getLife() <= 0) {
 					this.onGameOver();
 				}
@@ -184,11 +214,15 @@
 		var Player   = Class.create( Group, {
 			initialize: function() {
 				Group.apply( this, arguments );
-				this.life = 50;
+				this.life       = 50;
+				this.shield     = 5;
+				this.score      = 0;
 			},
+
 			getLife: function() {
 				return this.life;
 			},
+
 			reduceLife: function( dLife ) {
 				if ( dLife === undefined ) { return; }
 				this.life -= dLife;
@@ -197,7 +231,32 @@
 			restoreLife: function( dLife ) {
 				if ( dLife === undefined ) { return; }
 				this.life += dLife;
+			},
+
+			getShield: function() {
+				return this.shield;
+			},
+
+			addShield: function( dShield ) {
+				if ( dShield === undefined ) { return; }
+				this.shield += dShield;
+			},
+
+			consumeShield: function( dShield ) {
+				if ( dShield === undefined ) { return; }
+				this.shield -= dShield;
+			},
+
+			getScore: function() {
+				return this.score;
+			},
+
+			addScore: function( dScore ) {
+				if ( dScore === undefined ) { return; }
+				this.score += dScore;
 			}
+
+
 		});
 
 		var Field    = Class.create( Group, {
@@ -429,6 +488,7 @@
 				}
 				return damage;
 			},
+
 			getRemovedPanelsInfo: function() {
 				//まずはライフだけ
 				var restoreLife = 0;
@@ -437,6 +497,16 @@
 					restoreLife += this.chainedPanels[i].getInfoWhenRemoved();
 				}
 				return restoreLife ;
+			},
+
+			//TODO:上とまとめる。
+			getGotScores: function() {
+				var score = 0;
+				var length = this.chainedPanels.length;
+				for ( var i = 0; i < length; i++ ){
+					score += this.chainedPanels[i].getScore() * ( i + 1 );
+				}
+				return score;
 			}
 		});
 
@@ -492,6 +562,10 @@
 				return this.chainedType;
 			},
 
+			getScore: function() {
+				return this.score;
+			},
+
 			isSamePanel: function( panelType) {
 				return panelType === this.chainedType;
 			},
@@ -521,6 +595,7 @@
 				Panel.apply( this, arguments );
 				this.image = game.assets[ 'img/panels5.png'];
 				this.panelType = PANEL_TYPE.COIN;
+				this.score      = SCORE.COIN;
 				this.frame     = 1;
 				this.setChainedType();
 			},
@@ -531,6 +606,7 @@
 				Panel.apply( this, arguments );
 				this.image = game.assets[ 'img/panels5.png'];
 				this.panelType = PANEL_TYPE.POTION;
+				this.score      = SCORE.POTION;
 				this.frame     = 2;
 				this.restore   = 1;
 				this.setChainedType();
@@ -548,6 +624,7 @@
 				Panel.apply( this, arguments );
 				this.image = game.assets[ 'img/panels5.png'];
 				this.panelType = PANEL_TYPE.SHIELD;
+				this.score      = SCORE.SHIELD;
 				this.frame  = 3;
 				this.setChainedType();
 			},
@@ -558,6 +635,7 @@
 				Panel.apply( this, arguments );
 				this.image = game.assets[ 'img/panels5.png'];
 				this.panelType = PANEL_TYPE.SKELTON;
+				this.score      = SCORE.SKELTON;
 				this.frame  = 4;
 				this.damage = 1;
 				this.setChainedType();
@@ -589,6 +667,7 @@
 				Panel.apply( this, arguments );
 				this.image = game.assets[ 'img/panels5.png'];
 				this.panelType = PANEL_TYPE.SWORD;
+				this.score      = SCORE.SWORD;
 				this.frame  = 6;
 				this.setChainedType();
 			},
