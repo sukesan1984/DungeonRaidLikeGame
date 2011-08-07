@@ -184,7 +184,7 @@
 		var Player   = Class.create( Group, {
 			initialize: function() {
 				Group.apply( this, arguments );
-				this.life = 10;
+				this.life = 50;
 			},
 			getLife: function() {
 				return this.life;
