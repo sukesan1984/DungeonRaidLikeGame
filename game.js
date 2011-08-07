@@ -87,7 +87,7 @@
 			onEnter: function() {
 				this.title      = new Label( "Game Over" );
 				this.gamestart  = new Label( "Retry" );
-				this.scoreLabel = new Label( "今回のスコア:" + score );
+				this.scoreLabel = new Label( "今回のスコア:" + this.score );
 				this.gamestart.moveTo( 0, 20 );
 				this.scoreLabel.moveTo( 0, 40 );
 				this.gamestart.addEventListener('touchstart', bind( function(e) {
@@ -149,7 +149,7 @@
 			},
 
 			onGameOver: function() {
-				this.nextScene  = new GameOverScene( game );
+				this.nextScene  = new GameOverScene( game, this.Player.getScore() );
 				this.game.replaceScene( this.nextScene );
 			},
 
@@ -214,7 +214,7 @@
 		var Player   = Class.create( Group, {
 			initialize: function() {
 				Group.apply( this, arguments );
-				this.life       = 50;
+				this.life       = 10;
 				this.shield     = 5;
 				this.score      = 0;
 			},
