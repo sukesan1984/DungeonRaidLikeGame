@@ -183,7 +183,7 @@
 
 			endTurn: function() {
 				this.Field.closeUp();
-				var damage      = this.Field.getDamageFromEnemies();
+				var damage      = this.Field.getDamageFromEnemies() * (parseInt(this.turn / 10) + 1);
 				var gotDamage   = ( ( damage - this.Player.getShield() ) < 0 ) ? 0 : damage - this.Player.getShield();
 				var restoreLife = this.Field.getRemovedPanelsInfo();
 				var score       = this.Field.getGotScores();
@@ -263,8 +263,6 @@
 				if ( dScore === undefined ) { return; }
 				this.score += dScore;
 			}
-
-
 		});
 
 		var Field    = Class.create( Group, {
