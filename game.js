@@ -244,6 +244,7 @@
 			addShield: function( dShield ) {
 				if ( dShield === undefined ) { return; }
 				this.shield += dShield;
+				if ( this.shield > 5 ) { this.shield = 5; }
 			},
 
 			consumeShield: function( dShield ) {
