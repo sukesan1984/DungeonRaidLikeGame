@@ -299,7 +299,8 @@
 			onUpdate: function() {
 				var length = this.drawnArrows.length;
 				for ( var i = 0; i < length; i++ ) {
-					this.addChild( this.drawnArrows[i] );
+					//this.addChild( this.drawnArrows[i] );
+					this.drawnArrows[i].visible = true;
 				}
 			},
 
@@ -465,8 +466,7 @@
 				arrow.scale( this.scale, this.scale );
 				arrow.setPosAndDir( pos, dir );
 				this.drawnArrows.push( arrow );
-				//this.addChild( arrow );
-				arrow.visible = true;
+				this.addChild( arrow );
 			},
 
 			closeUp: function() {
