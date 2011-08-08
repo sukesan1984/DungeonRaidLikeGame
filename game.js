@@ -293,6 +293,14 @@
 				this.addEventListener( 'touchstart', this.onTouchStart );
 				this.addEventListener( 'touchend', this.onTouchEnd );
 				this.addEventListener( 'touchmove', this.onTouchMove );
+				this.addEventListener( 'enterframe', this.onUpdate );
+			},
+
+			onUpdate: function() {
+				var length = this.drawnArrows.length;
+				for ( var i = 0; i < length; i++ ) {
+					this.addChild( this.drawnArrows[i] );
+				}
 			},
 
 			addTurnManager: function( manager ) {
@@ -320,6 +328,7 @@
 				var isSame          = false;
 				var isNextToLastPos = false;
 				var panel = this.fields[pos.x][pos.y];
+				if ( this.lastTargetPos == pos ) { return; }
 				isSame          = panel.isSamePanel( this.typeOfPanel )
 				isNextToLastPos = panel.isNextPanel( this.lastTargetPos );
 				if ( isSame && isNextToLastPos ) {
@@ -451,11 +460,13 @@
 				}
 				
 				var arrow =  new Arrow( PANEL_X_SIZE, PANEL_Y_SIZE, dir );
+				arrow.visible = false;
 				arrow.moveTo( pos.x * PANEL_X_SIZE * this.scale, pos.y * PANEL_Y_SIZE * this.scale );
 				arrow.scale( this.scale, this.scale );
 				arrow.setPosAndDir( pos, dir );
 				this.drawnArrows.push( arrow );
-				this.addChild( arrow );
+				//this.addChild( arrow );
+				arrow.visible = true;
 			},
 
 			closeUp: function() {
