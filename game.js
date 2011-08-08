@@ -282,7 +282,8 @@
 				this.chainedPanels     = [];
 				this.removedPositions  = [];
 				this.drawnArrows       = [];
-				//this.drawnArrowsInfo    = {};
+				//次のフレームで一度だけvisibleをtrueにするためだけのPanels;
+				this.needToUpdateArrows = false;
 				this.createInitialField();
 				this.refleshPos();
 				this.onEnter();
@@ -297,10 +298,12 @@
 			},
 
 			onUpdate: function() {
-				var length = this.drawnArrows.length;
-				for ( var i = 0; i < length; i++ ) {
-					//this.addChild( this.drawnArrows[i] );
-					this.drawnArrows[i].visible = true;
+				if ( this.needToUpdateArrows ) {
+					var length = this.drawnArrows.length;
+					for ( var i = 0; i < length; i++ ) {
+						this.drawnArrows[i].visible = true;
+					}
+					this.needToUpdateArrows = false;
 				}
 			},
 
@@ -467,6 +470,7 @@
 				arrow.setPosAndDir( pos, dir );
 				this.drawnArrows.push( arrow );
 				this.addChild( arrow );
+				this.needToUpdateArrows = true;
 			},
 
 			closeUp: function() {
