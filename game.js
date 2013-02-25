@@ -4,13 +4,31 @@
 			return func.apply(scope, arguments);
 		}
 	}
+    function EncodeHTMLForm( data )
+    {
+        var params = [];
+
+        for( var name in data )
+        {
+            var value = data[ name ];
+            var param = encodeURIComponent( name ).replace( /%20/g, '+' )
+                + '=' + encodeURIComponent( value ).replace( /%20/g, '+' );
+
+            params.push( param );
+        }
+
+        return params.join( '&' );
+    }
+    function getImagePath( image ) {
+        return "games/DungeonRaidLike/" + image;
+    }
 
 	function initialize(){
 		enchant();
 		var game = new Game( 400, 400 );
 		var resources = [
-			"img/panels5.png",
-			"img/yajirushi.png"
+			getImagePath("img/panels5.png"),
+			getImagePath("img/yajirushi.png")
 		];
 		var PANEL_X_SIZE = 64;
 		var PANEL_Y_SIZE = 64;
@@ -64,8 +82,10 @@
 			onEnter: function() {
 				this.title      = new Label( "Dungeon Raid" );
 				this.gamestart  = new Label( "Game Start" );
+
 				this.gamestart.moveTo( 0, 20 );
 				this.gamestart.addEventListener('touchstart', bind( function(e) {
+
 					this.nextScene  = new GameScene( game );
 					this.game.replaceScene( this.nextScene );
 					this.onExit();
@@ -85,9 +105,19 @@
 				this.onEnter();
 			},
 			onEnter: function() {
+                this.name = prompt('input your name','guest');
+                httpObj = new XMLHttpRequest();
+                httpObj.onload = function () {};
+                httpObj.open("POST", "../../scores", true);
+                httpObj.setRequestHeader( 'Content-Type', 'application/x-www-form-urlencoded' );
+                httpObj.send( EncodeHTMLForm({
+                    name: this.name,
+                    score: this.score
+                } ) );
 				this.title      = new Label( "Game Over" );
 				this.gamestart  = new Label( "Retry" );
 				this.scoreLabel = new Label( "今回のスコア:" + this.score );
+
 				this.gamestart.moveTo( 0, 20 );
 				this.scoreLabel.moveTo( 0, 40 );
 				this.gamestart.addEventListener('touchstart', bind( function(e) {
@@ -602,7 +632,7 @@
 
 			removePanel: function() {
 				this.frame  = 0;
-				this.image  = game.assets[ 'img/panels5.png' ];
+				this.image  = game.assets[ getImagePath('img/panels5.png') ];
 				this.removd = true;
 			},
 
@@ -623,7 +653,7 @@
 		var Coin    = Class.create( Panel, {
 			initialize: function() {
 				Panel.apply( this, arguments );
-				this.image = game.assets[ 'img/panels5.png'];
+				this.image = game.assets[ getImagePath('img/panels5.png')];
 				this.panelType = PANEL_TYPE.COIN;
 				this.score      = SCORE.COIN;
 				this.frame     = 1;
@@ -634,7 +664,7 @@
 		var Potion    = Class.create( Panel, {
 			initialize: function() {
 				Panel.apply( this, arguments );
-				this.image = game.assets[ 'img/panels5.png'];
+				this.image = game.assets[ getImagePath('img/panels5.png')];
 				this.panelType = PANEL_TYPE.POTION;
 				this.score      = SCORE.POTION;
 				this.frame     = 2;
@@ -652,7 +682,7 @@
 		var Shield    = Class.create( Panel, {
 			initialize: function() {
 				Panel.apply( this, arguments );
-				this.image = game.assets[ 'img/panels5.png'];
+				this.image = game.assets[ getImagePath('img/panels5.png')];
 				this.panelType = PANEL_TYPE.SHIELD;
 				this.score      = SCORE.SHIELD;
 				this.frame  = 3;
@@ -667,7 +697,7 @@
 		var Skelton    = Class.create( Panel, {
 			initialize: function() {
 				Panel.apply( this, arguments );
-				this.image = game.assets[ 'img/panels5.png'];
+				this.image = game.assets[ getImagePath('img/panels5.png')];
 				this.panelType = PANEL_TYPE.SKELTON;
 				this.score      = SCORE.SKELTON;
 				this.frame  = 4;
@@ -699,7 +729,7 @@
 		var Sword    = Class.create( Panel, {
 			initialize: function() {
 				Panel.apply( this, arguments );
-				this.image = game.assets[ 'img/panels5.png'];
+				this.image = game.assets[ getImagePath('img/panels5.png')];
 				this.panelType = PANEL_TYPE.SWORD;
 				this.score      = SCORE.SWORD;
 				this.frame  = 6;
@@ -710,7 +740,7 @@
 		var Arrow   = Class.create( Sprite, {
 			initialize: function( x, y, dir ) {
 				Sprite.apply( this, arguments );
-				this.image = game.assets[ 'img/yajirushi.png' ];
+				this.image = game.assets[ getImagePath('img/yajirushi.png') ];
 				this.frame = dir;
 				this.dir   = dir;
 				this.pos   = {x: undefined, y: undefined };

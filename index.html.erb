@@ -1,0 +1,29 @@
+<!DOCTYPE HTML>
+<%= render 'shared/common_header' %>
+<div class="container">
+    <div class="hero-unit">
+        <title>Dungeon Raid Like Game</title>
+        <h1>Dungeon Raid Like Game</h1>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <style>
+        body{
+            margin: 0;
+        }
+        </style>
+            <title></title>
+        </head>
+        <body>
+            <!--<canvas id="sample" width="300" height="300"></canvas>-->
+        <!--<script type="text/javascript" src="test.js"></script>-->
+
+        <%= javascript_include_tag "enchant.js", "game.js" %>
+        </body>
+        </html>
+    </div>
+    <%= link_to "score",
+    "scores",
+    :class => 'btn btn-link' %><br>
+    <div id="enchant-stage" style="width:400px;height:400px;mergin:0 auto;"></div>
+</div class="hero-unit">
